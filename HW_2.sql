@@ -12,19 +12,41 @@ CREATE TABLE Orders_NotNF (
 ---- **** Таблиця в 1НФ **** ----
 
 -- Робимо поле ProductName атомарним (неподільним)
--- штучний ключ Id для унікальності записів
--- унікальність полів (OrderNumber, ProductName) щоб не було повторів в замовлені.
+-- штучний ключ Id для унікальності записів -- прибрав штучший ключ
+-- унікальність полів (OrderNumber, ProductName) щоб не було повторів в замовлені -- прибрав унікальність полів (OrderNumber, ProductName) так як тепер вони є складеним ключем
+-- зробив складений ключ (OrderNumber, ProductName) так як тепер вони є унікальними ідентифікаторами
 CREATE TABLE Orders_1NF (
-	Id				INT				AUTO_INCREMENT PRIMARY KEY
-,	OrderNumber		INT				
+	--Id				INT				AUTO_INCREMENT PRIMARY KEY
+	OrderNumber		INT				
 ,	ProductName		VARCHAR(240)
+,   Quantity        INT             DEFAULT 1
 ,	Adress			VARCHAR(240)	NULL
 ,	OrderDate		DATETIME 		DEFAULT (CURRENT_DATE())
 ,	ClientName		VARCHAR(240)
-,	UNIQUE (OrderNumber, ProductName)
+--,	UNIQUE (OrderNumber, ProductName)
+,   PRIMARY KEY (OrderNumber, ProductName)
 )
 ;
--- !!! так як в таблиці Orders_1NF в нас немає складеного ключа  то таблиця автоматично може вважатися в 2 нормальній формі
+
+---- **** ПРИВЕДЕННЯ ТАБЛИЦЬ ДО 2НФ **** ----
+
+-- Таблиця замовлень (залежність тільки від OrderNumber)
+CREATE TABLE Orders_2NF (
+    OrderNumber     INT             PRIMARY KEY
+,   OrderDate       DATE            DEFAULT (CURRENT_DATE())
+,   ClientName      VARCHAR(100)
+,   ClientAddress   VARCHAR(240)
+);
+
+-- Таблиця деталей (залежність від складеного ключа)
+CREATE TABLE OrderDetails_2NF (
+    OrderNumber     INT
+,   ProductName     VARCHAR(100)
+,   Quantity        INT
+  
+,   PRIMARY KEY (OrderNumber, ProductName)
+,   FOREIGN KEY (OrderNumber) REFERENCES Orders_2NF(OrderNumber) ON DELETE CASCADE
+);
 
 
 ---- **** ПРИВЕДЕННЯ ТАБЛИЦЬ ДО 3НФ **** ----
